@@ -16,7 +16,7 @@ document.body.appendChild(renderer.domElement);
 const orbit = new OrbitControls(main_camera, renderer.domElement);
 
 add_plane();
-add_cube();
+add_sphere();
 const global_axes_helper = new THREE.AxesHelper(2);
 scene.add(global_axes_helper);
 
@@ -32,16 +32,12 @@ function add_plane(){
     scene.add(plane);
 }
 
-function add_cube(){
-    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    const cube = new THREE.Mesh( geometry, material );
-    // For edges
-    const edges = new THREE.EdgesGeometry( geometry ); 
-    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: 0xffffff , linewidth: 1 } ) ); 
-    cube.add( line );
+function add_sphere(){
+    const geometry = new THREE.SphereGeometry( 1, 1, 1 );
+    const material = new THREE.MeshBasicMaterial( { color: 0x0000ff } );
+    const sphere = new THREE.Mesh( geometry, material );
     
-    scene.add( cube );
+    scene.add( sphere );
 }
 
 function animate(){
