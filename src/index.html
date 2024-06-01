@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ThreeJS Demo</title>
+        
+        <!-- To remove scroll bars -->
+        <style>
+            body {
+                margin: 0
+            }
+        </style>
+        
+        <!-- Using a build tool like npm is the recommended approach -->
+        <!-- If importing from a CDN i.e. static version -->
+        <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@v0.164.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.164.0/examples/jsm/"
+          }
+        }
+    </script>
+    </head>
+    <body>
+        <script src="./js/main.js" type="module"></script>
+    </body>
+</html>
