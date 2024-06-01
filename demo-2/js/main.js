@@ -33,7 +33,7 @@ function add_plane(){
 }
 
 function add_sphere(){
-    const geometry = new THREE.SphereGeometry( 1, 1, 1 );
+    const geometry = new THREE.SphereGeometry(0.5, 20, 20);
     const material = new THREE.MeshBasicMaterial( { color: 0x0000ff } );
     const sphere = new THREE.Mesh( geometry, material );
     
