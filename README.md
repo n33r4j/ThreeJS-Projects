@@ -2,6 +2,8 @@
 
 Projects made to play around with threejs.
 
-1. [Demo Scene 1](./demo-1/)
+1. [Demo Scene 1](./demo-1/) (Just a base case to make sure everything works)
 
-2. [Demo Scene 2](./demo-2/)
+2. [Boids (random)](./boids/)
+
+3. [Nao Joints Viewer]()

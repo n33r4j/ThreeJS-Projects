@@ -14,6 +14,8 @@
         </style>
         
         <!-- Using a build tool like npm is the recommended approach -->
+        <!-- This is prone to version mismatches, seriously consider a build tool! -->
+        
         <!-- If importing from a CDN i.e. static version -->
         <script type="importmap">
         {
@@ -22,7 +24,7 @@
             "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.164.0/examples/jsm/"
           }
         }
-    </script>
+        </script>
     </head>
     <body>
         <script src="./js/main.js" type="module"></script>
