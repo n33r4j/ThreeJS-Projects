@@ -6,4 +6,6 @@ Projects made to play around with threejs.
 
 2. [Boids (random)](./boids/)
 
-3. [Nao Joints Viewer]()
+3. [Course Viewer](./courseview/)
+
+4. [Nao Joints Viewer]()
