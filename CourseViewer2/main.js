@@ -1,3 +1,7 @@
+/*
+Currently crashes if there's no Y (elevation) data.
+*/
+
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import GUI from 'lil-gui';
@@ -22,11 +26,16 @@ var PLANE_BOUNDS = 30.0;
 var COURSES = ["Jabulani_22km_course_2024.gpx", 
                "runsoc-1.gpx", 
                "TBR-21km-course-v3.gpx",
-               "2024_uta_50.gpx"]
+               "2024_uta_50.gpx",
+               "2025_uta_50.gpx",
+               "s2s-2024-real.gpx"]
+
 var MAP_GREEN = 0x052e07;
 var MAP_DGREEN = 0x0a2e07;
-var MAP_ORANGE = 0xf54a1b;
+var MAP_ORANGE = 0xfa3802;
 var HL_GREY = 0x4f4f4f;
+var HL_CYAN = 0x00ffff;
+var HL_DCYAN = 0x6b959a;
 var BG_GREY = 0x303030;
 var BG_LGREY = 0x909090;
 var BG_DGREY = 0x101010;
@@ -34,23 +43,85 @@ var BG_BLACK = 0x000000;
 var BG_LBLUE = 0x5a86cc;
 var BG = BG_BLACK;
 
+
 var map_obj = new THREE.Group();
+var vert_topo;
+var line_3d;
+var path;
+var yExaggerate = 1.0
+var map_margin = 0.01 * SCALE;
+var course_span = 1.0;
+
+function calculateDistance(coords) {
+    function haversine(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // Earth radius in meters
+        const toRadians = Math.PI / 180;
+        const dLat = (lat2 - lat1) * toRadians;
+        const dLon = (lon2 - lon1) * toRadians;
+        const a = Math.sin(dLat / 2) ** 2 +
+                  Math.cos(lat1 * toRadians) * Math.cos(lat2 * toRadians) * Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    let totalDistance = 0;
+    for (let i = 1; i < coords.length; i++) {
+        const lat1 = parseFloat(coords[i - 1].getAttribute('lat'));
+        const lon1 = parseFloat(coords[i - 1].getAttribute('lon'));
+        const lat2 = parseFloat(coords[i].getAttribute('lat'));
+        const lon2 = parseFloat(coords[i].getAttribute('lon'));
+        totalDistance += haversine(lat1, lon1, lat2, lon2);
+    }
+    return totalDistance / 1000; // Convert to kilometers
+}
+
+function calculateElevationGain(coords) {
+    let totalElevationGain = 0;
+
+    for (let i = 1; i < coords.length; i++) {
+        const prevEle = parseFloat(coords[i - 1].getElementsByTagName('ele')[0]?.textContent || 0);
+        const currEle = parseFloat(coords[i].getElementsByTagName('ele')[0]?.textContent || 0);
+
+        // Add to elevation gain only if there's an increase in elevation
+        if (currEle > prevEle) {
+            totalElevationGain += currEle - prevEle;
+        }
+    }
+
+    return totalElevationGain; // Return the total gain in meters
+}
 
 function load_course_data(course){
+    
     const course_data = [];
     // routes/TBR-21km-course-v3.gpx
+    clearScene(map_obj);
     fetch("routes/" + course)
         .then(response => response.text())
         .then((data) => {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(data,"text/xml");
+            const metadata = xmlDoc.getElementsByTagName("metadata")[0];
+            const metadata_course_name = metadata.getElementsByTagName("name")[0]?.textContent || "Untitled Course";
+            const metadata_desc = metadata.getElementsByTagName("desc")[0]?.textContent || "Untitled Course";
             const course = xmlDoc.getElementsByTagName("trk")[0];
+            const course_name = course.getElementsByTagName("name")[0]?.textContent || "Untitled Course";
+            document.getElementById("overlay-title").textContent = metadata_course_name;
+            
             //console.log(course);
             // Not always present
             //const course_name = course.getElementsByTagName("name")[0].textContent;
             // console.log(course_name);
             const coords = course.getElementsByTagName("trkpt");
             // console.log(coords);
+            
+            const distance = calculateDistance(coords).toFixed(2);
+            document.getElementById("overlay-field-distance").textContent = `Distance: ${distance} km`;
+            const elevation_gain = calculateElevationGain(coords).toFixed(0);
+            document.getElementById("overlay-field-elevationgain").textContent = `Elevation Gain: ${elevation_gain} m`;
+
+
+            
             var xlim = [-10000.0, 10000.0]; // max, min
             var zlim = [-10000.0, 10000.0];
 
@@ -59,7 +130,7 @@ function load_course_data(course){
                 // upto 50.0 is okay, 100.0 ~ 500.0 is good enough
                 // for larger maps, try higher numbers if slow
                 var scale = SCALE; // larger means smaller map
-                var yExaggerate = 10.0; // keep between 10 ~ 100 to see elevation for flatter courses
+                // [defined on top globally] var yExaggerate = 10.0; // keep between 10 ~ 100 to see elevation for flatter courses
                 var fA = 1000000.0;
                 var fB = 1000000.0;
                 // [TODO]: So it seems that some points have more precision than 6 digits sometime.
@@ -100,10 +171,9 @@ function load_course_data(course){
                 pt.x -= course_center[0];
                 pt.z -= course_center[1];
             })
-            var s = Math.ceil(Math.max(xlim[0]-xlim[1], zlim[0]-zlim[1]));
-            var margin = 2;
-            PLANE_BOUNDS = s + margin;
-            add_plane(s + margin);
+            course_span = Math.ceil(Math.max(xlim[0]-xlim[1], zlim[0]-zlim[1]));
+            PLANE_BOUNDS = course_span + map_margin;
+            add_plane(course_span + map_margin);
             
             main_camera.position.set(-PLANE_BOUNDS,PLANE_BOUNDS*0.9,PLANE_BOUNDS*0.8);
             main_camera.rotateZ(Math.PI/3.0);
@@ -112,9 +182,15 @@ function load_course_data(course){
         })
         .then(() => {
             // console.log(course_data);
-            add_points(course_data);
-            add_line(course_data);
-            add_path(course_data);
+            
+            // add_points(course_data);
+            path = add_line(course_data);
+            vert_topo = add_path(course_data);
+            // line_3d = make_3D_line_spline(course_data, SCALE/10000.0);
+            line_3d = createTubesFromPoints(course_data, SCALE/20000.0, MAP_ORANGE);
+            map_obj.add(path);
+            map_obj.add(vert_topo);
+            map_obj.add(line_3d);
             
             add_marker("S", course_data[0]);
             add_marker("F", course_data[course_data.length - 1]);
@@ -141,7 +217,7 @@ scene.background = new THREE.Color( BG );
 renderer.setAnimationLoop( animate );
 document.body.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
 
 // const pointLight = new THREE.PointLight(0xffffff, 1.0, 0.0);
@@ -158,16 +234,92 @@ scene.add(ambientLight);
 
 const orbit = new OrbitControls(main_camera, renderer.domElement);
 orbit.zoomSpeed = -1; // To have infinite zoom (i.e. no slow-down when zooming)
+orbit.dampingFactor = 0.05;
 
 main_camera.position.set(-30,30,30); 
 //main_camera.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI/4);
 // main_camera.updateProjectionMatrix();
 orbit.update();
 
-load_course_data(COURSES[0]);
+load_course_data(COURSES[5]);
 
 const global_axes_helper = new THREE.AxesHelper(2);
 scene.add(global_axes_helper);
+
+function reset_elevation_scale (){
+    elevation_slider.value = 1;
+    elevation_slider_value.textContent = elevation_slider.value;
+    vert_topo.scale.y = 1;
+}
+
+document.getElementById("overlay-field-uploadgpx").addEventListener("change", function (event) {
+    const file = event.target.files[0]; // Get the selected file
+
+    if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            load_course_data(file.name);
+            reset_elevation_scale();
+        };
+
+        reader.onerror = function () {
+            console.error("Failed to read the file");
+        };
+
+        reader.readAsText(file); // Read the file as text
+    } else {
+        alert("No file selected");
+    }
+});
+
+const elevation_slider = document.getElementById("scaling-slider");
+const elevation_slider_value = document.getElementById("sliderValue");
+const reset_scale_button = document.getElementById("scaling-reset");
+const rotation_checkbox = document.getElementById("rotation-toggle");
+rotation_checkbox.checked = true;
+
+elevation_slider.addEventListener("input", function (event) {
+    const new_scale = parseFloat(event.target.value);
+    vert_topo.scale.y = new_scale;
+    path.scale.y = new_scale;
+    elevation_slider_value.textContent = elevation_slider.value;
+});
+
+window.addEventListener("load", function () {
+    elevation_slider.value = 1.0;
+});
+
+reset_scale_button.addEventListener('click', () => {
+    reset_elevation_scale();
+});
+
+
+
+function clearScene(scene) {
+    // Loop through all the children in the scene
+    for (let i = scene.children.length - 1; i >= 0; i--) {
+        const child = scene.children[i];
+
+        // Check if the child is a mesh
+        if (child.isMesh || child.isLine || child.isGroup) {
+            // Dispose of geometry and material
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    // If the material is an array, dispose of each material
+                    child.material.forEach((mat) => mat.dispose());
+                } else {
+                    // Otherwise, dispose of the single material
+                    child.material.dispose();
+                }
+            }
+
+            // Remove the mesh from the scene
+            scene.remove(child);
+        }
+    }
+}
 
 function add_marker(mtype, pos){
   var color = 0xffff00;
@@ -233,6 +385,19 @@ function make_ribbon_mesh(pts_A, pts_B){
     return pts;
 }
 
+function make_3D_line_spline(pts, radius){
+    const path = new THREE.CatmullRomCurve3(
+                    pts.map(p => new THREE.Vector3(...p)),
+                    false, // Closed curve: false
+                    "catmullrom", // Spline type
+                    0 // Tension (lower values = sharper corners)
+                );
+    const geometry = new THREE.TubeGeometry(path, pts.length, radius, 16, false);
+    const material = new THREE.MeshStandardMaterial({ color: MAP_ORANGE });
+    const tube = new THREE.Mesh(geometry, material);
+    return tube;
+}
+
 function make_vertical_mesh(pts){
     const pts_v = [];
     
@@ -259,6 +424,42 @@ function make_vertical_mesh(pts){
     return pts_v;
 }
 
+function createCylinderBetweenPoints(point1, point2, radius = 0.05, color = 0x00ff00) {
+    const direction = new THREE.Vector3().subVectors(point2, point1); // Vector from point1 to point2
+    const distance = direction.length(); // Length of the vector
+  
+    // Create cylinder geometry
+    const geometry = new THREE.CylinderGeometry(radius, radius, distance, 32);
+    const material = new THREE.MeshBasicMaterial({ color });
+    const cylinder = new THREE.Mesh(geometry, material);
+  
+    // Align the cylinder's orientation with the direction vector
+    const up = new THREE.Vector3(0, 1, 0); // Default cylinder orientation is along Y-axis
+    cylinder.quaternion.setFromUnitVectors(up, direction.clone().normalize());
+  
+    // Position the cylinder at the midpoint between the two points
+    const midpoint = new THREE.Vector3().addVectors(point1, point2).multiplyScalar(0.5);
+    cylinder.position.copy(midpoint);
+  
+    return cylinder;
+  }
+  
+  function createTubesFromPoints(points, radius = 0.05, color = 0x00ff00) {
+    const group = new THREE.Group();
+  
+    for (let i = 0; i < points.length - 1; i++) {
+      const point1 = new THREE.Vector3(...points[i]);
+      const point2 = new THREE.Vector3(...points[i + 1]);
+      const cylinder = createCylinderBetweenPoints(point1, point2, radius, color);
+      const point_sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, 12, 12), new THREE.MeshBasicMaterial({ color: color }));
+      point_sphere.position.set(points[i].x, points[i].y, points[i].z);
+      group.add(cylinder);
+      group.add(point_sphere);
+    }
+  
+    return group;
+  }
+
 function add_plane(s){
     const geometry = new THREE.PlaneGeometry(s, s, s, s);
     const material = new THREE.MeshBasicMaterial( { color: MAP_DGREEN, side: THREE.DoubleSide } );
@@ -274,7 +475,8 @@ function add_line(pts){
     const geometry = new THREE.BufferGeometry().setFromPoints(pts);
     const material = new THREE.MeshBasicMaterial( {color: 0x0000ff} );
     const path = new THREE.Line(geometry, material);
-    map_obj.add(path);
+    return path;
+    // map_obj.add(path);
     //scene.add(path);
 }
 
@@ -326,15 +528,20 @@ function add_path(pts){
     // const mesh_pts = pts;
     //const material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
     //const line = new THREE.Line(geometry, material);
-    
+
+
     const mesh_pts = make_vertical_mesh(pts);
     // console.log("mesh_pts:");
     // console.log(mesh_pts);
     const geometry = new THREE.BufferGeometry().setFromPoints(mesh_pts);
     // const material = new THREE.MeshBasicMaterial( {color: HL_GREY, side: THREE.DoubleSide } );
-    const material = new THREE.MeshPhongMaterial( {color: HL_GREY, side: THREE.DoubleSide } );
+    const material = new THREE.MeshBasicMaterial( {color: HL_DCYAN, 
+                                                    side: THREE.DoubleSide, 
+                                                    transparent: true,
+                                                    opacity: 0.5 } );
     const topo = new THREE.Mesh(geometry, material);
-    map_obj.add(topo);
+    return topo;
+    // map_obj.add(topo);
     //scene.add(topo);
     // console.log("- Done -");
 }
@@ -353,7 +560,15 @@ function add_cube(){
 
 function animate(){
     // cube.rotation.y += 0.01;
-    map_obj.rotation.y += 0.001;
+    if (rotation_checkbox.checked) {
+        map_obj.rotation.y += 0.001;
+    }
     renderer.render(scene, main_camera);
     stats.update();
 }
+
+window.addEventListener('resize', () => {
+    main_camera.aspect = window.innerWidth / window.innerHeight;
+    main_camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});

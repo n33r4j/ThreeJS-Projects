@@ -38,7 +38,7 @@ h1 {
 #app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
 }
 
@@ -70,16 +70,109 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #494949;
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
   border-color: #646cff;
+  background-color: #575c87;
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.overlay {
+  width: 20%;
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  background: rgba(129, 129, 129, 0.2);
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
+  border-radius: 5px;
+  z-index: 4; /* Make sure this is higher than the canvas */
+  pointer-events: auto;
+}
+
+#overlay-title {
+  text-wrap: normal;
+}
+
+.elevationfactor {
+  display:flex;
+  text-wrap:nowrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.slidercontainer {
+  /* display: flex;  */
+  /* justify-content: space-between; */
+  width: 100%;
+  height: 100%;
+}
+
+.scalingslider {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+/* Style the container for the info icon */
+.info-container {
+  position: relative;
+  /* display: inline-block; */
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Style the info bubble */
+.info-bubble {
+  visibility: hidden;
+  word-wrap: normal;
+  white-space: normal; /* text wrap doesn't work without this*/
+  overflow: hidden;
+  width: 300%; /* Adjust width as needed */
+  max-height: fit-content;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 8px;
+  border-radius: 5px;
+
+  /* Position the bubble */
+  position: absolute;
+  bottom: 125%; /* Adjust position above the icon */
+  /* left: 10%; */
+  transform: translateX(-10%);
+  z-index: 10;
+
+  /* Arrow pointing down */
+  opacity: 0; /* Invisible by default */
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.info-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%; /* Bottom of the bubble */
+  left: 10%;
+  /* transform: translateX(-100%); */
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+/* Show the bubble on hover */
+.info-container:hover .info-bubble {
+  visibility: visible;
+  text-wrap: normal;
+  opacity: 0.8;
 }
 
 @media (prefers-color-scheme: light) {
