@@ -113,13 +113,21 @@ button:focus-visible {
   pointer-events: auto;
 }
 
-.close-overlay {
+.toggle-overlay {
   position: absolute;
-  top: 0;
-  right: 0;
+  background: #0056b2;
+  top: 10%;
+  left: 25.5%;
   padding: 4px;
   width: 30px;
   cursor: pointer;
+  z-index: 25;
+  transition: transform 0.3s ease, background 0.3s ease; /* Smooth animation */
+}
+
+.toggle-overlay.translated {
+  left: 0.5%;
+  background: #006cdf;
 }
 
 .overlay-field-course-list {
@@ -499,6 +507,16 @@ input:checked + .slider:before {
     pointer-events: auto;
     overflow-x: hidden;  
     overflow-y: scroll;
+  }
+
+  .toggle-overlay {
+    top: 60%;
+    left: 90.5%;
+  }
+
+  .toggle-overlay.translated {
+    top: 10%;
+    left: 0.5%;
   }
 
   .overlay-field-course-list {

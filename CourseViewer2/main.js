@@ -375,6 +375,11 @@ document.getElementById("overlay-field-uploadgpx").addEventListener("change", fu
     }
 });
 
+const overlay = document.getElementById("overlay");
+const toggle_overlay_btn = document.getElementById("toggle-overlay");
+
+let isOverlayVisible = true;
+
 const elevation_slider = document.getElementById("scaling-slider");
 const elevation_slider_value = document.getElementById("sliderValue");
 const reset_scale_button = document.getElementById("scaling-reset");
@@ -394,6 +399,19 @@ overlay_course_list_dropdown.addEventListener("change", () => {
 
 overlay_gpx_upload.addEventListener("change", () => {
     loading_icon_2.style.visibility = "visible";
+});
+
+toggle_overlay_btn.addEventListener("click", () => {
+    isOverlayVisible = !isOverlayVisible;
+    if(isOverlayVisible){
+        overlay.style.display = "block";
+        toggle_overlay_btn.textContent = "✖";
+        toggle_overlay_btn.classList.remove('translated'); // Apply the translation
+    } else {
+        overlay.style.display = "none";
+        toggle_overlay_btn.textContent = "☰";
+        toggle_overlay_btn.classList.add('translated'); // Apply the translation
+    }
 });
 
 // // Add a marker for the course slider
