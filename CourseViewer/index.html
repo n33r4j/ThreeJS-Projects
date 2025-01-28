@@ -16,7 +16,17 @@
         <!-- Using a build tool like npm is the recommended approach -->
         <!-- This is prone to version mismatches, seriously consider a build tool! -->
         
-        
+        <!-- If importing from a CDN i.e. static version -->
+        <!-- <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@v0.164.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.164.0/examples/jsm/",
+            "lilgui": "https://cdn.jsdelivr.net/npm/lil-gui@0.19.2/dist/lil-gui.esm.js",
+            "stats": "https://cdnjs.cloudflare.com/ajax/libs/stats.js/7/Stats.js"
+          }
+        }
+        </script> -->
     </head>
     <body>
         <script src="./js/main.js" type="module"></script>

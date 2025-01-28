@@ -23,16 +23,26 @@ document.body.appendChild(stats.dom);
 var SCALE = 1000.0;
 var PLANE_BOUNDS = 30.0;
 
-var COURSES = ["Jabulani_22km_course_2024.gpx", 
-               "runsoc-1.gpx", 
-               "TBR-21km-course-v3.gpx",
-               "2024_uta_50.gpx",
-               "2025_uta_50.gpx",
-               "s2s-2024-real.gpx"]
+let currCourseFileIndex = 0;
+
+var COURSES = [
+    "s2s-2024-real.gpx",
+    "Jabulani_22km_course_2024.gpx",
+    "Jabulani_45km_course_2024.gpx",  
+    "TBR-21km-course-v3.gpx",
+    "2024_uta_50.gpx",
+    "2025_uta_50.gpx",
+    "Six Foot Track Loop.gpx"
+]
+
+
 
 var MAP_GREEN = 0x052e07;
 var MAP_DGREEN = 0x0a2e07;
 var MAP_ORANGE = 0xfa3802;
+var MAP_RED = 0xff0000;
+var MAP_BLUE = 0x0000ff;
+var MAP_YELLOW = 0xffff00;
 var HL_GREY = 0x4f4f4f;
 var HL_CYAN = 0x00ffff;
 var HL_DCYAN = 0x6b959a;
@@ -45,25 +55,29 @@ var BG = BG_BLACK;
 
 
 var map_obj = new THREE.Group();
+var course_data = [];
+// var course_data_dist_elev = [];
 var vert_topo;
 var line_3d;
 var path;
+var km_markers;
+var coords; // GPX data
 var yExaggerate = 1.0
 var map_margin = 0.01 * SCALE;
 var course_span = 1.0;
 
-function calculateDistance(coords) {
-    function haversine(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // Earth radius in meters
-        const toRadians = Math.PI / 180;
-        const dLat = (lat2 - lat1) * toRadians;
-        const dLon = (lon2 - lon1) * toRadians;
-        const a = Math.sin(dLat / 2) ** 2 +
-                  Math.cos(lat1 * toRadians) * Math.cos(lat2 * toRadians) * Math.sin(dLon / 2) ** 2;
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-    }
+function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth radius in meters
+    const toRadians = Math.PI / 180;
+    const dLat = (lat2 - lat1) * toRadians;
+    const dLon = (lon2 - lon1) * toRadians;
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(lat1 * toRadians) * Math.cos(lat2 * toRadians) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
 
+function calculateDistance(coords) {
     let totalDistance = 0;
     for (let i = 1; i < coords.length; i++) {
         const lat1 = parseFloat(coords[i - 1].getAttribute('lat'));
@@ -93,7 +107,7 @@ function calculateElevationGain(coords) {
 
 function load_course_data(course){
     
-    const course_data = [];
+    // const course_data = [];
     // routes/TBR-21km-course-v3.gpx
     clearScene(map_obj);
     fetch("routes/" + course)
@@ -112,15 +126,15 @@ function load_course_data(course){
             // Not always present
             //const course_name = course.getElementsByTagName("name")[0].textContent;
             // console.log(course_name);
-            const coords = course.getElementsByTagName("trkpt");
+            coords = course.getElementsByTagName("trkpt");
             // console.log(coords);
             
             const distance = calculateDistance(coords).toFixed(2);
-            document.getElementById("overlay-field-distance").textContent = `Distance: ${distance} km`;
+            document.getElementById("distance-value").textContent = `${distance}`;
             const elevation_gain = calculateElevationGain(coords).toFixed(0);
-            document.getElementById("overlay-field-elevationgain").textContent = `Elevation Gain: ${elevation_gain} m`;
+            document.getElementById("elevation-gain-value").textContent = `${elevation_gain}`;
 
-
+            
             
             var xlim = [-10000.0, 10000.0]; // max, min
             var zlim = [-10000.0, 10000.0];
@@ -179,6 +193,14 @@ function load_course_data(course){
             main_camera.rotateZ(Math.PI/3.0);
             main_camera.updateProjectionMatrix();
             orbit.update();
+
+            // var cumul_dist = 0.0;
+            // for(var i = 0; i < course_data.length-1; ++i){
+            //     course_data_dist_elev.push([cumul_dist, course_data[i].y]);
+            //     if(i > 0){
+            //         cumul_dist += course_data[i].distanceTo(course_data[i-1]);
+            //     }
+            // }
         })
         .then(() => {
             // console.log(course_data);
@@ -194,8 +216,37 @@ function load_course_data(course){
             
             add_marker("S", course_data[0]);
             add_marker("F", course_data[course_data.length - 1]);
+            km_markers = addKMMarkers(coords, course_data, MAP_YELLOW);
+            map_obj.add(km_markers);
             
             scene.add(map_obj);
+
+            // // Course Slider
+            // const course_slider = document.getElementById("course-slider");
+            // const distanceInfo = document.getElementById("distance-info");
+            // const elevationInfo = document.getElementById("elevation-info");
+
+            // // Set slider's max value to match the number of points
+            // course_slider.max = course_data.length - 1;
+
+            // course_slider.addEventListener("input", () => {
+            //     const index = parseInt(course_slider.value, 10);
+            //     const point = course_data[index];
+            //     // console.log(point);
+              
+            //     // Update marker position
+            //     marker.position.set(point.x, point.y, point.z);
+              
+            //     // Update distance and elevation info
+            //     distanceInfo.textContent = `Distance: ${course_data_dist_elev[index][0].toFixed(2)} km`;
+            //     elevationInfo.textContent = `Elevation: ${course_data_dist_elev[index][1].toFixed(2)} m`;
+            // });
+        })
+        .finally(() => {
+            // Hide the loading icon
+            document.getElementById("loading-icon-1").style.visibility = "hidden";
+            document.getElementById("loading-icon-2").style.visibility = "hidden";
+            // TODO: Hide only the corresponding icon.
         })
         
 }
@@ -211,7 +262,7 @@ function load_course_data(course){
 const scene = new THREE.Scene();
 const main_camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 0.01, 1000);
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 scene.background = new THREE.Color( BG );
 renderer.setAnimationLoop( animate );
@@ -241,7 +292,15 @@ main_camera.position.set(-30,30,30);
 // main_camera.updateProjectionMatrix();
 orbit.update();
 
-load_course_data(COURSES[5]);
+// Populate the dropdown on page load and add event listener
+document.addEventListener('DOMContentLoaded', () => {
+    populateSelect(COURSES);
+
+    const select = document.getElementById('course-list');
+    select.addEventListener('change', changeCourse);
+});
+
+load_course_data(COURSES[0]);
 
 const global_axes_helper = new THREE.AxesHelper(2);
 scene.add(global_axes_helper);
@@ -251,6 +310,49 @@ function reset_elevation_scale (){
     elevation_slider_value.textContent = elevation_slider.value;
     vert_topo.scale.y = 1;
 }
+
+// Function to populate the dropdown
+function populateSelect(files) {
+    const select = document.getElementById('course-list');
+    var index = 0;
+
+    files.forEach(file => {
+      const option = document.createElement('option');
+      option.value = index; // Set the value of the option
+      index++;
+      option.textContent = file; // Set the text shown in the dropdown
+      select.appendChild(option); // Add the option to the select element
+    });
+  }
+
+function changeCourse() {
+    const select = document.getElementById('course-list');
+    const index = parseInt(select.value);
+    clearScene(map_obj);
+    load_course_data(COURSES[index]);
+    reset_elevation_scale();
+}
+
+// function nextGPX() {
+//     currCourseFileIndex++;
+//     currCourseFileIndex %= COURSES.length;
+//     clearScene(map_obj);
+//     load_course_data(COURSES[currCourseFileIndex]);
+//     // console.log(currCourseFileIndex);
+// }
+
+// function previousGPX() {
+//     currCourseFileIndex--;
+//     if (currCourseFileIndex < 0) {
+//         currCourseFileIndex = COURSES.length - 1;
+//     }
+//     clearScene(map_obj);
+//     load_course_data(COURSES[currCourseFileIndex]);
+//     // console.log(currCourseFileIndex);
+// }
+
+// document.getElementById("prevButton").addEventListener("click", previousGPX);
+// document.getElementById("nextButton").addEventListener("click", nextGPX);
 
 document.getElementById("overlay-field-uploadgpx").addEventListener("change", function (event) {
     const file = event.target.files[0]; // Get the selected file
@@ -276,13 +378,42 @@ document.getElementById("overlay-field-uploadgpx").addEventListener("change", fu
 const elevation_slider = document.getElementById("scaling-slider");
 const elevation_slider_value = document.getElementById("sliderValue");
 const reset_scale_button = document.getElementById("scaling-reset");
-const rotation_checkbox = document.getElementById("rotation-toggle");
-rotation_checkbox.checked = true;
+const rotation_toggle_btn = document.getElementById("rotation-toggle").children[0];
+const km_markers_toggle_btn = document.getElementById("km-markers-toggle").children[0];
+
+
+const overlay_course_list_dropdown = document.getElementById("overlay-field-course-list");
+const loading_icon_1 = document.getElementById("loading-icon-1");
+
+const overlay_gpx_upload = document.getElementById("overlay-field-uploadgpx");
+const loading_icon_2 = document.getElementById("loading-icon-2");
+
+overlay_course_list_dropdown.addEventListener("change", () => {
+    loading_icon_1.style.visibility = "visible";
+});
+
+overlay_gpx_upload.addEventListener("change", () => {
+    loading_icon_2.style.visibility = "visible";
+});
+
+// // Add a marker for the course slider
+// const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+// const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+// const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+// scene.add(marker);
 
 elevation_slider.addEventListener("input", function (event) {
     const new_scale = parseFloat(event.target.value);
     vert_topo.scale.y = new_scale;
     path.scale.y = new_scale;
+    // km_markers.children.forEach((marker) => {
+    //     if(marker.geometry instanceof THREE.CylinderGeometry){
+    //         var y_offset = 1.0 ;
+    //         var marker_H = ((1.0 + y_offset*1.0)*SCALE/1000.0);
+    //         marker.geometry.dispose();
+    //         marker.geometry = new THREE.CylinderGeometry(SCALE/10000.0, SCALE/60000.0, marker_H * new_scale);
+    //     }
+    // });
     elevation_slider_value.textContent = elevation_slider.value;
 });
 
@@ -294,7 +425,9 @@ reset_scale_button.addEventListener('click', () => {
     reset_elevation_scale();
 });
 
-
+km_markers_toggle_btn.addEventListener('change', () => {
+    km_markers.visible = km_markers_toggle_btn.checked;
+});
 
 function clearScene(scene) {
     // Loop through all the children in the scene
@@ -319,6 +452,7 @@ function clearScene(scene) {
             scene.remove(child);
         }
     }
+    course_data = [];
 }
 
 function add_marker(mtype, pos){
@@ -342,6 +476,13 @@ function add_marker(mtype, pos){
   marker_base.position.set(pos.x, pos.y + 0.5*marker_H, pos.z);
   map_obj.add(marker);
   map_obj.add(marker_base);
+}
+
+function add_KM_marker(color) {  
+    var y_offset = 1.0;
+    var marker_H = ((1.0 + y_offset*1.0)*SCALE/1000.0);
+    const marker_base = new THREE.Mesh(new THREE.CylinderGeometry(SCALE/10000.0, SCALE/60000.0, marker_H), new THREE.MeshBasicMaterial( {color: color} ));
+    return marker_base;
 }
 
 function get_parallel(pts, w) {
@@ -442,9 +583,9 @@ function createCylinderBetweenPoints(point1, point2, radius = 0.05, color = 0x00
     cylinder.position.copy(midpoint);
   
     return cylinder;
-  }
+}
   
-  function createTubesFromPoints(points, radius = 0.05, color = 0x00ff00) {
+function createTubesFromPoints(points, radius = 0.05, color = 0x00ff00) {
     const group = new THREE.Group();
   
     for (let i = 0; i < points.length - 1; i++) {
@@ -458,7 +599,7 @@ function createCylinderBetweenPoints(point1, point2, radius = 0.05, color = 0x00
     }
   
     return group;
-  }
+}
 
 function add_plane(s){
     const geometry = new THREE.PlaneGeometry(s, s, s, s);
@@ -478,6 +619,40 @@ function add_line(pts){
     return path;
     // map_obj.add(path);
     //scene.add(path);
+}
+
+function addKMMarkers(coords, points, color) {
+    const markersGroup = new THREE.Group();
+    let cumulativeDistance = 0;
+    const markerInterval = 1000; // 1 KM in meters
+    let lastMarkerDistance = 0;
+  
+    for (let i = 1; i < coords.length; i++) {
+      const distance = haversine(parseFloat(coords[i - 1].getAttribute('lat')), 
+                                 parseFloat(coords[i - 1].getAttribute('lon')), 
+                                 parseFloat(coords[i].getAttribute('lat')), 
+                                 parseFloat(coords[i].getAttribute('lon'))
+                                );
+      
+      cumulativeDistance += distance;
+    //   console.log("cumul. distance outside: ", cumulativeDistance);
+  
+      if (cumulativeDistance - lastMarkerDistance >= markerInterval) {
+        // console.log("cumul. distance: ", cumulativeDistance);
+        const pos = points[i].clone();
+        var y_offset = 1.0;
+        var marker_H = ((1.0 + y_offset*1.0)*SCALE/1000.0);
+        const marker = add_KM_marker(color);
+        marker.position.set(pos.x, pos.y + 0.5*marker_H, pos.z);
+        
+        // Add marker to the group
+        markersGroup.add(marker);
+  
+        lastMarkerDistance = cumulativeDistance;
+      }
+    }
+  
+    return markersGroup; // Return the group for toggling later
 }
 
 function add_points(pts){
@@ -560,8 +735,10 @@ function add_cube(){
 
 function animate(){
     // cube.rotation.y += 0.01;
-    if (rotation_checkbox.checked) {
-        map_obj.rotation.y += 0.001;
+    if (rotation_toggle_btn.checked) {
+        var rot_step = 0.001;
+        map_obj.rotation.y += rot_step;
+        global_axes_helper.rotation.y += rot_step;
     }
     renderer.render(scene, main_camera);
     stats.update();

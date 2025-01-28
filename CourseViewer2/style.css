@@ -22,12 +22,21 @@ a:hover {
   color: #535bf2;
 }
 
+ul {
+  padding-left: 5%;
+}
+
 body {
-  margin: 0;
+  margin: 0 0;
   display: flex;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+}
+
+p {
+  margin-top: 0.6rem;
+  margin-bottom: 0.6rem;
 }
 
 h1 {
@@ -35,9 +44,13 @@ h1 {
   line-height: 1.1;
 }
 
+h2 {
+  margin: 0 0 0 0;
+}
+
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
+  /* max-width: 1280px; */
+  margin: 0 0;
   padding: 0;
   text-align: center;
 }
@@ -75,19 +88,22 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
-  background-color: #575c87;
+  border-color: #a6a6a7;
+  background-color: #bfbfbf;
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/***********************************************************/
 .overlay {
-  width: 20%;
+  width: 25%;
+  height: 75%;
+  max-height: 100%;
   position: absolute;
-  top: 60px;
-  left: 10px;
+  top: 10%;
+  /* left: 1%; */
   background: rgba(129, 129, 129, 0.2);
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -97,35 +113,279 @@ button:focus-visible {
   pointer-events: auto;
 }
 
+.close-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px;
+  width: 30px;
+  cursor: pointer;
+}
+
+.overlay-field-course-list {
+  display: flex;
+  width: 20vw;
+  height: 4vh;
+  flex-direction: column;
+  /* gap: 10px; */
+  /* margin-top: 10px; */
+}
+
+.overlay-content {
+  display: flex;
+  /* background: rgba(129, 129, 129, 0.2); */
+  flex-direction: column;
+  height: 90%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  color: white;
+  z-index: 4; /* Make sure this is higher than the canvas */
+  pointer-events: auto;
+  margin: 0;
+}
+
 #overlay-title {
   text-wrap: normal;
+}
+
+.existing-courses-console {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #444444;
+  border-radius: 8px;
+}
+
+.controls-console {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #444444;
+  border-radius: 8px;
+}
+
+.loading-icon {
+  width: 2vw;
+  visibility: hidden;
+}
+
+.loading-icon:hover {
+  visibility: visible;
+  opacity: 1.0;
+}
+
+.stats-console {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #444444;
+  border-radius: 8px;
+}
+
+.stats-title {
+  display: flex;
+}
+
+.overlay-controls-toggles {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #444444;
+  border-radius: 8px;
+  padding: 10px 0;
+  
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+
+}
+
+.gpx-controls {
+  position: relative;
+  /* top: 10px; */
+  /* right: 10px; */
+  width: 40%;
+  background: rgba(61, 61, 61, 0.5);
+  padding: 20px;
+  border-radius: 5px;
+  display: flex;
+  /* flex-direction: column; */
+  align-items: center;
+  gap: 3%;
+}
+
+.toggle-btn {
+  position: relative;
+  width: 60px;
+  height: 34px;
+  display: inline-block; /* Ensures it's treated like a block-level element for alignment */
+  /* padding: 1% 1%; */
+  /* font-size: 24px; */
+  /* width: 12%; */
+  /* text-align: center; */
+  /* line-height: 1.5; Ensures proper vertical alignment */
+  /* vertical-align: middle; Helps with inline alignment */
+  
+  cursor: pointer; /* Adds a pointer cursor on hover */ 
+}
+
+.toggle-btn input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #484848;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #007bff;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #007bff;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+  text-align: center;
+  font-size: 16pt;
+  /* vertical-align: middle; */
+}
+
+.slider.round:before {
+  border-radius: 50%;
+  /* border: 1px solid #222222; */
+  opacity: 0.4;
+}
+
+.overlay-field-uploadgpx {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #444444;
+  border-radius: 8px;
+}
+
+.gpx-controls button {
+  padding: 5px 10px;
+  border: none;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  width: 60%;
+  border-radius: 3px;
+}
+
+.gpx-controls button:hover {
+  background: #a5a9ac;
+}
+
+#bottom-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 70%;
+  top: 80%;
+  left: 25%;
+  bottom: 90%;
+  background: rgba(129, 129, 129, 0.2);
+  border-radius: 8px;
+  /* padding: 10px; */
+  padding-top: 1%;
+  padding-bottom: 6%;
+  padding-left: 2%;
+  padding-right: 2%;
+  display: flex;
+  flex-direction: column;
+  /* align-items: left; */
+  z-index: 20;
+}
+
+#course-slider {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+#info-display {
+  /* display: flex; */
+  /* justify-content: space-between; */
+  /* width: 80%; */
+  color: white;
+  font-family: Arial, sans-serif;
 }
 
 .elevationfactor {
   display:flex;
   text-wrap:nowrap;
   align-items: center;
-  gap: 10px;
+  gap: 3%;
+  margin: 0 0 0 0;
 }
 
 .slidercontainer {
-  /* display: flex;  */
+  /* display: flex; */
   /* justify-content: space-between; */
-  width: 100%;
-  height: 100%;
+  width: 85%;
+  /* height: 100%; */
 }
 
 .scalingslider {
   width: 100%;
-  height: 100%;
+  height: 15%;
 }
 
+.slider-controls-container {
+  display: inline;
+}
 
+.info-container-general {
+  position: relative;
+  overflow: visible;
+  /* display: inline-block; */
+  width: 7%;
+  height: 7%;
+  cursor: pointer;
+  font-size: 16px;
+}
 
-/* Style the container for the info icon */
-.info-container {
+.info-container-devnotes {
+  position: relative;
+  width: 30%;
+  /* display: inline-block; */
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.info-container-scaling {
   position: relative;
   /* display: inline-block; */
+  width: 7%;
   cursor: pointer;
   font-size: 16px;
 }
@@ -135,21 +395,22 @@ button:focus-visible {
   visibility: hidden;
   word-wrap: normal;
   white-space: normal; /* text wrap doesn't work without this*/
-  overflow: hidden;
-  width: 300%; /* Adjust width as needed */
+  overflow: visible;
+  width: 40cap; /* Adjust width as needed */
   max-height: fit-content;
   background-color: #333;
   color: #fff;
-  text-align: center;
-  padding: 8px;
-  border-radius: 5px;
+  text-align: left;
+  padding: 10px;
+  border-radius: 8px;
 
   /* Position the bubble */
-  position: absolute;
-  bottom: 125%; /* Adjust position above the icon */
+  position: fixed;
+  left: 10%;
+  bottom: 80%; /* Adjust position above the icon */
   /* left: 10%; */
-  transform: translateX(-10%);
-  z-index: 10;
+  /* transform: translateX(-10%); */
+  /* z-index: 20; */
 
   /* Arrow pointing down */
   opacity: 0; /* Invisible by default */
@@ -157,23 +418,37 @@ button:focus-visible {
 }
 
 /* Tooltip arrow */
-.info-bubble::after {
-  content: '';
-  position: absolute;
-  top: 100%; /* Bottom of the bubble */
-  left: 10%;
+/* .info-bubble::after { */
+  /* content: ''; */
+  /* position: absolute; */
+  /* top: 100%; Bottom of the bubble */
+  /* left: 10%; */
   /* transform: translateX(-100%); */
-  border-width: 5px;
-  border-style: solid;
-  border-color: #333 transparent transparent transparent;
-}
+  /* border-width: 5px; */
+  /* border-style: solid; */
+  /* border-color: #333 transparent transparent transparent; */
+/* } */
 
 /* Show the bubble on hover */
-.info-container:hover .info-bubble {
+.info-container-general:hover .info-bubble {
+  visibility: visible;
+  text-wrap: normal;
+  overflow: visible;
+  z-index: 20;
+  opacity: 1.0;
+}
+
+.info-container-scaling:hover .info-bubble {
+  visibility: visible;
+  text-wrap: normal;
+  opacity: 1.0;
+}
+
+/* .info-container-devnotes:hover .info-bubble {
   visibility: visible;
   text-wrap: normal;
   opacity: 0.8;
-}
+} */
 
 @media (prefers-color-scheme: light) {
   :root {
@@ -181,9 +456,67 @@ button:focus-visible {
     background-color: #ffffff;
   }
   a:hover {
-    color: #747bff;
+    color: #b5b5b5;
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+@media (max-width: 1100px) {
+  .overlay {
+    width: 40%;
+    height: 75%;
+    max-height: 100%;
+    position: absolute;
+    top: 10%;
+    /* left: 1%; */
+    background: rgba(129, 129, 129, 0.2);
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    border-radius: 5px;
+    z-index: 4; /* Make sure this is higher than the canvas */
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .overlay {
+    width: 88%;
+    position: absolute;
+    top: 60%;
+    margin: 0 auto;
+    max-width: 100%;
+    height: 34%;
+    /* left: 1%; */
+    background: rgba(129, 129, 129, 0.2);
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    border-radius: 5px;
+    z-index: 4; /* Make sure this is higher than the canvas */
+    pointer-events: auto;
+    overflow-x: hidden;  
+    overflow-y: scroll;
+  }
+
+  .overlay-field-course-list {
+    width: 80vw;
+  }
+
+  .loading-icon {
+    width: 16vw;
+    visibility: hidden;
+  }
+
+  .slidercontainer {
+    width: 95%;
+  }
+
+  .info-bubble {
+    left: 2%;
+    max-width: 90%;
+    bottom: 80%;
   }
 }
