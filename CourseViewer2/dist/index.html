@@ -7,80 +7,119 @@
     
     <title>Course Viewer 2</title>
     
-    <script type="module" crossorigin src="/threejs-projects/courseview/assets/index-CHdm9GxZ.js"></script>
-    <link rel="stylesheet" crossorigin href="/threejs-projects/courseview/assets/index-DErCohkD.css">
+    <script type="module" crossorigin src="/threejs-projects/courseview/assets/index-CQ45oYde.js"></script>
+    <link rel="stylesheet" crossorigin href="/threejs-projects/courseview/assets/index-C5hupaLm.css">
   </head>
   <body>
+    <button id="toggle-overlay" class="toggle-overlay">✖</button>
     <div id="overlay" class="overlay">
       <h2 id="overlay-title">Course Name</h2>
-      <p><b>Existing Courses</b></p>
-      <div class="gpx-controls">
-        <!-- <span id="currentFile">Showing: file1.gpx</span> -->
-        <button id="prevButton">Previous</button>
-        <button id="nextButton">Next</button>
-      </div>
-      <hr>
-
       <div id="overlay-content" class="overlay-content">
-        <div id="overlay-stats-title" class="overlay-stats-title">
-          <p><b>Stats</b></p>
-          <div class="info-container-general">
-            <svg xmlns="http://www.w3.org/2000/svg"  viewBox="-20 -20 100 100" width="100%" height="100%">
-              <circle cx="25" cy="25" r="23" fill="#2c48a3" />
-              <path d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 25 11 A 3 3 0 0 0 22 14 A 3 3 0 0 0 25 17 A 3 3 0 0 0 28 14 A 3 3 0 0 0 25 11 z M 21 21 L 21 23 L 22 23 L 23 23 L 23 36 L 22 36 L 21 36 L 21 38 L 22 38 L 23 38 L 27 38 L 28 38 L 29 38 L 29 36 L 28 36 L 27 36 L 27 21 L 26 21 L 22 21 L 21 21 z" fill="white"/>
-            </svg>
-            <div class="info-bubble">
-              DISTANCE is generally accurate but ELEVATION GAIN is not. Values are calculated from the GPX file without any filtering(DEMs).
-            </div>
+        <div id="existing-courses-console" class="existing-courses-console">
+          <h3>Existing Courses</h3>
+          <div id="overlay-field-course-list" class="overlay-field-course-list">
+            <select id="course-list" name="course-list">
+              <option value="">-- Select a course --</option>
+            </select>
           </div>
-        </div>
-        <div id="overlay-field-distance">
-          <p>Distance: x km</p>
-        </div>
-        <div id="overlay-field-elevationgain">
-          <p>Elevation Gain: x m</p>
+          <div id="loading-icon-1" class="loading-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+              <rect fill="#2591FF" stroke="#2591FF" stroke-width="15" stroke-linejoin="round" width="30" height="30" x="85" y="85" rx="0" ry="0">
+                <animate attributeName="rx" calcMode="spline" dur="1" values="15;15;5;15;15" keySplines=".5 0 .5 1;.8 0 1 .2;0 .8 .2 1;.5 0 .5 1" repeatCount="indefinite"></animate>
+                <animate attributeName="ry" calcMode="spline" dur="1" values="15;15;10;15;15" keySplines=".5 0 .5 1;.8 0 1 .2;0 .8 .2 1;.5 0 .5 1" repeatCount="indefinite"></animate>
+                <animate attributeName="height" calcMode="spline" dur="1" values="30;30;1;30;30" keySplines=".5 0 .5 1;.8 0 1 .2;0 .8 .2 1;.5 0 .5 1" repeatCount="indefinite"></animate>
+                <animate attributeName="y" calcMode="spline" dur="1" values="40;170;40;" keySplines=".6 0 1 .4;0 .8 .2 1" repeatCount="indefinite"></animate>
+              </rect>
+            </svg>
+          </div>
         </div>
         
-      <!-- Water points, Aid stations, POI, -->
-      </div>
-      
-      <hr>
-      <p><b>Controls</b></p>
-      <div id="overlay-controls-scaling" class="slidercontainer">
-        <div id="elevation-factor" class="elevationfactor">
-          <p>Elevation Scaling Factor:</p>
-          <p id="sliderValue">1</p>
-          <div class="info-container-scaling">
-            <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 -30 100 100" width="100%" height="100%">
-              <circle cx="25" cy="25" r="23" fill="#2c48a3" />
-              <path d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 25 11 A 3 3 0 0 0 22 14 A 3 3 0 0 0 25 17 A 3 3 0 0 0 28 14 A 3 3 0 0 0 25 11 z M 21 21 L 21 23 L 22 23 L 23 23 L 23 36 L 22 36 L 21 36 L 21 38 L 22 38 L 23 38 L 27 38 L 28 38 L 29 38 L 29 36 L 28 36 L 27 36 L 27 21 L 26 21 L 22 21 L 21 21 z" fill="white"/>
-            </svg>
-            <div class="info-bubble">
-              This slider exaggerates the elevation profile to make it easier to see changes.
+        <div id="stats-console" class="stats-console">
+          <div id="stats-title" class="stats-title">
+            <h3>Stats</h3>
+            <div class="info-container-general">
+              <svg xmlns="http://www.w3.org/2000/svg"  viewBox="-20 -50 100 100" width="40px" height="40px">
+                <circle cx="25" cy="25" r="23" fill="#2c48a3" />
+                <path d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 25 11 A 3 3 0 0 0 22 14 A 3 3 0 0 0 25 17 A 3 3 0 0 0 28 14 A 3 3 0 0 0 25 11 z M 21 21 L 21 23 L 22 23 L 23 23 L 23 36 L 22 36 L 21 36 L 21 38 L 22 38 L 23 38 L 27 38 L 28 38 L 29 38 L 29 36 L 28 36 L 27 36 L 27 21 L 26 21 L 22 21 L 21 21 z" fill="white"/>
+              </svg>
+              <div class="info-bubble" left="1.5" bottom="51%">
+                DISTANCE is generally accurate but ELEVATION GAIN is not. Values are calculated from the GPX file without any filtering(DEMs).
+              </div>
+            </div>
+          </div>
+          <div id="distance-stat" class="distance-stat">
+            <span id="distance-label" class="distance-label">Distance:</span>
+            <span id="distance-value" class="distance-value">0.0</span>
+            <span id="distance-unit" class="distance-unit">km</span>
+          </div>
+          <div id="elevation-gain-stat" class="elevation-gain-stat">
+            <span id="elevation-gain-label" class="elevation-gain-label">Elevation Gain:</span>
+            <span id="elevation-gain-value" class="elevation-gain-value">0.0</span>
+            <span id="elevation-gain-unit" class="elevation-gain-unit">m</span>
+            <span id="elevation-gain-note" class="elevation-gain-nonte">(see info bubble)</span>
+          </div>
+        </div>
+        <!-- Water points, Aid stations, POI, -->
+
+        <div class="controls-console">
+          <h3>Controls</h3>
+          <div id="overlay-controls-scaling" class="slidercontainer">
+            <div id="elevation-factor" class="elevationfactor">
+              <p>Elevation Scaling Factor:</p>
+              <p id="sliderValue">1</p>
+              <div class="info-container-scaling">
+                <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 -30 100 100" width="40px" height="40px">
+                  <circle cx="25" cy="25" r="23" fill="#2c48a3" />
+                  <path d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 25 11 A 3 3 0 0 0 22 14 A 3 3 0 0 0 25 17 A 3 3 0 0 0 28 14 A 3 3 0 0 0 25 11 z M 21 21 L 21 23 L 22 23 L 23 23 L 23 36 L 22 36 L 21 36 L 21 38 L 22 38 L 23 38 L 27 38 L 28 38 L 29 38 L 29 36 L 28 36 L 27 36 L 27 21 L 26 21 L 22 21 L 21 21 z" fill="white"/>
+                </svg>
+                <div class="info-bubble" left="1.5" bottom="51%">
+                  This slider exaggerates the elevation profile to make it easier to see changes.
+                </div>
+              </div>
+            </div>
+            <div class="slider-controls-container">
+              <input id="scaling-slider" type="range" min="1.0" max="50.0" value="1.0" step="0.1" class="scalingslider">
+              <button id="scaling-reset">Reset</button>
             </div>
           </div>
         </div>
-        <input id="scaling-slider" type="range" min="1.0" max="50.0" value="1.0" step="0.1" class="scalingslider">
-        <button id="scaling-reset">Reset</button>
-      </div>
-      <input id="rotation-toggle" class="rotation-toggle" type="checkbox" checked >Toggle Auto Revolve </input>
-      <input id="km-markers-toggle" class="km-markers-toggle" type="checkbox" checked >Toggle KM Markers </input>
+        <!-- <input id="rotation-toggle" class="rotation-toggle" type="checkbox" checked >Toggle Auto Revolve </input> -->
+        <!-- <input id="km-markers-toggle" class="km-markers-toggle" type="checkbox" checked >Toggle KM Markers </input> -->
+        <div id="overlay-controls-toggles" class="overlay-controls-toggles">
+          <label id="rotation-toggle" class="toggle-btn">
+            <input type="checkbox" checked />
+            <span class="slider round">🔄</span>
+          </label>
+          <label id="km-markers-toggle" class="toggle-btn">
+            <input type="checkbox" checked />
+            <span class="slider round">KM📍</span>
+          </label>
+        </div>
 
-      <hr>
-      <p><b>Upload GPX</b></p>
-      <div id="overlay-field-uploadgpx">
-        <input type="file" id="gpx" accept=".gpx" />
-        <!-- <button id="uploadgpx">Upload</button> -->
-      </div>
-      <hr>
-      <div class="info-container-devnotes">
-        [ Dev Notes ]
-        <div class="info-bubble">
-            <ul> 
-              <li>The viewer has not been optimized. In general, the larger the GPX file (i.e. more data points), the lower the FPS.</li>
-              <li>It's currently not well optimized for mobile or tablet devices. Will work on that.</li>
-              <li>If you notice a black screen or frozen UI, just wait a bit. Large GPX files take a while to load.</li>
-            </ul>
+        <div class="overlay-field-uploadgpx">
+          <h3>Upload GPX</h3>
+          <div id="overlay-field-uploadgpx">
+            <input type="file" id="gpx" accept=".gpx" />
+            <!-- <button id="uploadgpx">Upload</button> -->
+          </div>
+          <div id="loading-icon-2" class="loading-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+              <rect fill="#2591FF" stroke="#2591FF" stroke-width="15" stroke-linejoin="round" width="30" height="30" x="85" y="85" rx="0" ry="0">
+                <animate attributeName="rx" calcMode="spline" dur="1" values="15;15;5;15;15" keySplines=".5 0 .5 1;.8 0 1 .2;0 .8 .2 1;.5 0 .5 1" repeatCount="indefinite"></animate>
+                <animate attributeName="ry" calcMode="spline" dur="1" values="15;15;10;15;15" keySplines=".5 0 .5 1;.8 0 1 .2;0 .8 .2 1;.5 0 .5 1" repeatCount="indefinite"></animate>
+                <animate attributeName="height" calcMode="spline" dur="1" values="30;30;1;30;30" keySplines=".5 0 .5 1;.8 0 1 .2;0 .8 .2 1;.5 0 .5 1" repeatCount="indefinite"></animate>
+                <animate attributeName="y" calcMode="spline" dur="1" values="40;170;40;" keySplines=".6 0 1 .4;0 .8 .2 1" repeatCount="indefinite"></animate>
+              </rect>
+            </svg>
+          </div>
+        </div>
+        <div class="dev-notes">
+          <h4>Dev Notes</h4>
+          <ul> 
+            <li>The viewer has not been optimized. In general, the larger the GPX file (i.e. more data points), the lower the FPS.</li>
+            <li>The UI may not look great on all screen sizes.(Still working on that)</li>
+            <li>If you notice a black screen or frozen UI, just wait for a few seconds. Large GPX files take a while to load.</li>
+          </ul>
         </div>
       </div>
     </div>
